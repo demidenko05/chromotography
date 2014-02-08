@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.demidenko05.android.chromatography"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="4"
+          />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+      	<provider android:label="chromatography data to show"
+   			android:name="org.demidenko05.android.chromatography.provider.ContentProviderForChartdroid"
+	        android:authorities="org.demidenko05.android.chromatography.provider"
+		/>
+        <activity
+            android:name="org.demidenko05.android.chromatography.MainActivity"
+            android:label="@string/app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="org.demidenko05.android.chromatography.StoredDataActivity"
+            android:label="@string/title_activity_stored_data" >
+        </activity>
+        <activity
+            android:name="org.demidenko05.android.chromatography.PickerForSingleActivity"
+            android:label="@string/title_activity_picker_for_single" >
+        </activity>
+    </application>
+
+</manifest>

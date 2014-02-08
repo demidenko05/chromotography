@@ -1,2 +1,1 @@
-chromotography
-==============
+This Android application store chromatography data in SQLite database. These data are columns, analytes, solvents, detectors, series - mobile phase and time series of retention time of an analyte. These series can be plotted with ChartDroid (https://code.google.com/p/chartdroid is REQUIRED!!!).

@@ -1,0 +1,19 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/action_filter_column"
+        android:orderInCategory="100"
+        android:title="@string/filter_column" android:visible="true" android:enabled="true">
+    </item>
+    <item android:id="@+id/act_fltr_detect" 
+        android:orderInCategory="101"
+        android:title="@string/filter_detector" android:visible="true" android:enabled="true"></item>
+    <item android:id="@+id/act_clear_fltcolumn" 
+        android:orderInCategory="102"
+        android:title="@string/clear_fltrcolumn"></item>
+    <item android:id="@+id/act_clear_fltdetector" 
+        android:orderInCategory="103"
+        android:title="@string/clear_fltrdetector"></item>
+    <item android:id="@+id/act_show" android:orderInCategory="99" android:title="@string/show"></item>
+    
+</menu>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Chromatography android helper</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_choose_column">Choose column</string>
+    <string name="button_stored_data">Show stored data</string>
+    <string name="button_get_new_data">Get new data</string>
+    <string name="title_activity_stored_data">Stored data</string>
+    <string name="stored_series">Stored series</string>
+    <string name="title_activity_picker_for_single">Picker of a single item</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="filter_column">Filter column</string>
+    <string name="filter_detector">Filter detector</string>
+    <string name="nothing">Nothing</string>
+    <string name="show">Show data</string>
+    <string name="select_an_item">Please select an item</string>
+    <string name="cancel">Cancel</string>
+    <string name="pick_item">Pick item</string>
+    <string name="pick_items">Pick items</string>
+    <string name="warning">Warning</string>
+    <string name="clear_fltrcolumn">Clear column filter</string>
+    <string name="clear_fltrdetector">Clear detector filter</string>
+    <string name="there_is_no_filter">There is no filter!</string>
+    <string name="need_chartdroid">You need to download ChartDroid to display this data!</string>
+    <string name="pl_sel_ser_to_show">Please select series to show!</string>
+    <string name="recreate_db">Recreate/repopulate database</string>
+    <string name="are_you_sure">Are you sure?</string>
+    <string name="apply">Apply</string>
+    <string name="ser_no_same_dur">The chosen series have not the same duration!</string>
+    
+</resources>
