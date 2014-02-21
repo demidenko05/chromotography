@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Chromatography android helper</string>
+    <string name="app_name">Chromatography recorder</string>
     <string name="action_settings">Settings</string>
     <string name="title_choose_column">Choose column</string>
     <string name="button_stored_data">Show stored data</string>
@@ -13,7 +13,7 @@
     <string name="filter_column">Filter column</string>
     <string name="filter_detector">Filter detector</string>
     <string name="nothing">Nothing</string>
-    <string name="show">Show data</string>
+    <string name="show">Plot data</string>
     <string name="select_an_item">Please select an item</string>
     <string name="cancel">Cancel</string>
     <string name="pick_item">Pick item</string>
@@ -24,9 +24,47 @@
     <string name="there_is_no_filter">There is no filter!</string>
     <string name="need_chartdroid">You need to download ChartDroid to display this data!</string>
     <string name="pl_sel_ser_to_show">Please select series to show!</string>
+    <string name="pl_sel_ser_to_edit">Please select single series to edit!</string>
     <string name="recreate_db">Recreate/repopulate database</string>
     <string name="are_you_sure">Are you sure?</string>
     <string name="apply">Apply</string>
+    <string name="pick">pick</string>
     <string name="ser_no_same_dur">The chosen series have not the same duration!</string>
+    <string name="title_activity_create_series">Series</string>
+    <string name="select">&#8230;</string>
+    <string name="column">Column:</string>
+    <string name="detector">Detector:</string>
+    <string name="mobile_phase">Mobile phase:</string>
+    <string name="generate_series">Generate series for an analyte</string>
+    <string name="store_series">Save series head</string>
+    <string name="description">Description:</string>
+    <string name="must_complete_data">You have to complete description, column and detector!</string>
+   	<string name="must_save_series">You have to save series head first!</string>
+    <string name="must_complete_data_ss">You have to complete solvent and amount!</string>
+    <string name="must_complete_data_sb">You have to complete analyte and time series and step!</string>
+    <string name="must_complete_data_sbts">You have to complete analyte, duration, step, top and buttom values!</string>
+    <string name="must_save_head">You have to complete descreption, column and detector and store series head!</string>
+    <string name="title_activity_series_solvents">Mobile phase</string>
+    <string name="solvent">Solvent:</string>
+    <string name="amount">Amount:</string>
+    <string name="store_series_solvent">Save series solvent</string>
+    <string name="create_series_solvent">Add solvent</string>
+    <string name="create_series_body">Add analyte and create time series for it</string>
+    <string name="incomplete_data">The chosen series have incomplite data!</string>
+    <string name="edit">Edit</string>
+    <string name="flow_rate">Flow rate:</string>
+    <string name="wavelength">Detector parameter:</string>
+    <string name="analyte">Analyte</string>
+    <string name="save">Save</string>
+    <string name="injection">Injection:</string>
+    <string name="duration">Duration in steps (e.g. 18):</string>
+    <string name="step">Quantity of steps in one minute (e.g. 2):</string>
+    <string name="generate_time_series">Generate time series</string>
+    <string name="retention_moment">Retention moment step (e.g. 7):</string>
+    <string name="retention_top">Retention top value (e.g. 600)</string>
+    <string name="retention_buttom">Retention buttom value (e.g. 0)</string>
+    <string name="time_series">Time series:</string>
+    <string name="title_activity_series_body">Add analyte and time series of retention of it</string>
+    <string name="delete">Delete</string>
     
 </resources>

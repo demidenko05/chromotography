@@ -1,0 +1,7 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item android:id="@+id/act_store_series" android:title="@string/store_series"></item>
+    <item android:id="@+id/actAddSeriesLolvent" android:title="@string/create_series_solvent"></item>
+    <item android:id="@+id/actAddSeriesBody" android:title="@string/create_series_body"></item>
+    
+</menu>

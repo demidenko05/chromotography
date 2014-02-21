@@ -4,11 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import static org.demidenko05.android.chromatography.model.TableDescriptor.*;
-
+import static org.demidenko05.android.chromatography.sqlite.OrmService.*;
+import org.demidenko05.android.chromatography.OrmServicesFactory;
+import org.demidenko05.android.chromatography.exception.IncompleteDataException;
 import org.demidenko05.android.chromatography.exception.SeriesNotSameDurationException;
-import org.demidenko05.android.chromatography.model.AbstractEntity;
-import org.demidenko05.android.chromatography.model.AbstractEntityWithName;
 import org.demidenko05.android.chromatography.model.Analyte;
 import org.demidenko05.android.chromatography.model.Column;
 import org.demidenko05.android.chromatography.model.Detector;
@@ -28,32 +27,59 @@ public class DatabaseService {
 		return databaseService;
 	}
 		
-	public long insert(SQLiteDatabase db, AbstractEntity entity) {
-	    return db.insert(entity.getTableName(), null, entity.getValuesMap());
-	}
-
-	public void update(SQLiteDatabase db, AbstractEntity entity) {
-		db.update(entity.getTableName(), entity.getValuesMap(), "Where "+AbstractEntity.COLUMN_ID+"="+entity.getId(), null);
-	}
-
-	public void delete(SQLiteDatabase db, AbstractEntity entity) {
-		db.delete(entity.getTableName(), "Where "+AbstractEntity.COLUMN_ID+"="+entity.getId(), null);
-	}
-	
-	public <T  extends AbstractEntityWithName> List<T> getEntities(SQLiteDatabase db, T emptyEntity, String selection, String[] selectionArgs, 
-			String groupBy, String having, String orderBy) {
-		List<T> list = new ArrayList<T>();
-		Cursor cursor = db.query(emptyEntity.getTableName(),
-				emptyEntity.getAllColumns(), selection, selectionArgs, groupBy, having, orderBy);
+	public void fillSeriesAnalyteList(SQLiteDatabase db,  List<Analyte> listSolvents, long idSeriesHead) {
+		String queryStr = "Select a." + COLUMN_NAME + //0
+				", Min(s." + COLUMN_INJECTION + ")" +//1
+				", Min(a." + COLUMN_ID + ")" +//2
+				" From " + OrmServicesFactory.getInstance().getOrmService(Analyte.class).getTableName() + " a" +
+				" Join " + OrmServicesFactory.getInstance().getOrmService(SeriesBody.class).getTableName()+ " s" +
+				" On a." + COLUMN_ID + " = s." +COLUMN_ID_ANALYTE +
+				" Where s." +COLUMN_ID_SERIES + " = " + idSeriesHead +
+				" Group By a." +COLUMN_NAME ;
+		Cursor cursor = db.rawQuery(queryStr, null);
 		if(cursor.moveToFirst()) {
 			while(!cursor.isAfterLast()) {
-				list.add(emptyEntity.createEntity(cursor, emptyEntity));
+				int injection = cursor.getInt(1);
+				String add = injection == 0 ? "" : " " + Integer.toString(injection) + "ul";
+				Analyte analyte = new Analyte();
+				analyte.setName(cursor.getString(0) + add);
+				analyte.setId(cursor.getLong(2));
+				listSolvents.add(analyte);
 				cursor.moveToNext();
 			}
 		}
-		return list;
 	}
-
+	
+	public void fillSeriesSolventsList(SQLiteDatabase db,  List<SeriesSolvents> listSolvents,  long idSeriesHead) {
+		String queryStr = "Select serslv." + COLUMN_ID + //0
+				", slv." + COLUMN_ID + //1
+				", slv." + COLUMN_NAME + //2
+				", serslv." + COLUMN_AMOUNT_SOLVENT + //3
+				" From " + OrmServicesFactory.getInstance().getOrmService(SeriesHead.class).getTableName()+ " s" +
+				" Join " + OrmServicesFactory.getInstance().getOrmService(SeriesSolvents.class).getTableName()+ " serslv" +
+				" On s." + COLUMN_ID + " = serslv." + COLUMN_ID_SERIES + 
+				" Join " + OrmServicesFactory.getInstance().getOrmService(Solvent.class).getTableName()+ " slv" +
+				" On serslv." + COLUMN_ID_SOLVENT + " = slv." + COLUMN_ID + 
+				" Where s." +COLUMN_ID + " = " + idSeriesHead;
+		Cursor cursor = db.rawQuery(queryStr, null);
+		if(cursor.moveToFirst()) {
+			while(!cursor.isAfterLast()) {
+				SeriesSolvents serSolv = new SeriesSolvents(); 
+				serSolv.setId(cursor.getLong(0));
+				serSolv.setAmount(cursor.getString(3));
+				Solvent solvent = new Solvent();
+				solvent.setId(cursor.getLong(1));
+				solvent.setName(cursor.getString(2));
+				serSolv.setSolvent(solvent);
+				SeriesHead serHead = new SeriesHead();
+				serHead.setId(idSeriesHead);
+				serSolv.setSeriesHead(serHead);
+				listSolvents.add(serSolv);
+				cursor.moveToNext();
+			}
+		}
+	}
+	
 	public void fillSeriesList(SQLiteDatabase db,  List<SeriesHead> list,  String selection) {
 		String queryStr = "Select s." + COLUMN_ID + //0
 				", s." +COLUMN_NAME  + //1
@@ -63,14 +89,14 @@ public class DatabaseService {
 				", d." + COLUMN_NAME + //5
 				", slv." + COLUMN_NAME + //6
 				", serslv." + COLUMN_AMOUNT_SOLVENT + //7
-				" From " + SeriesHead.TABLE_NAME+ " s" +
-				" Join " + Column.TABLE_NAME+ " c" +
+				" From " + OrmServicesFactory.getInstance().getOrmService(SeriesHead.class).getTableName()+ " s" +
+				" Join " + OrmServicesFactory.getInstance().getOrmService(Column.class).getTableName()+ " c" +
 				" On s." + COLUMN_ID_COLUMN + " = c." + COLUMN_ID + 
-				" Join " + Detector.TABLE_NAME+ " d" +
+				" Join " + OrmServicesFactory.getInstance().getOrmService(Detector.class).getTableName()+ " d" +
 				" On s." + COLUMN_ID_DETECTOR + " = d." + COLUMN_ID + 
-				" Join " + SeriesSolvents.TABLE_NAME+ " serslv" +
+				" Join " + OrmServicesFactory.getInstance().getOrmService(SeriesSolvents.class).getTableName()+ " serslv" +
 				" On s." + COLUMN_ID + " = serslv." + COLUMN_ID_SERIES + 
-				" Join " + Solvent.TABLE_NAME+ " slv" +
+				" Join " + OrmServicesFactory.getInstance().getOrmService(Solvent.class).getTableName()+ " slv" +
 				" On serslv." + COLUMN_ID_SOLVENT + " = slv." + COLUMN_ID + 
 				selection +
 				" Order By s." + COLUMN_ID;
@@ -102,11 +128,11 @@ public class DatabaseService {
 		return in;
 	}
 
-	public String[] getTitles(SQLiteDatabase db, Map<String, SeriesHead> seriesToShow) throws SeriesNotSameDurationException {//analytes
+	public String[] getTitles(SQLiteDatabase db, Map<String, SeriesHead> seriesToShow) throws SeriesNotSameDurationException, IncompleteDataException {//analytes
 		List<String> resultInnm = new ArrayList<String>();
 		String queryStr = "Select a." +COLUMN_NAME  + ", Count(s." + COLUMN_ID + "), Min(s." +COLUMN_INJECTION  + "), Min(a." +COLUMN_ID  + ")" +
-				" From " + Analyte.TABLE_NAME + " a" +
-				" Join " + SeriesBody.TABLE_NAME+ " s" +
+				" From " + OrmServicesFactory.getInstance().getOrmService(Analyte.class).getTableName() + " a" +
+				" Join " + OrmServicesFactory.getInstance().getOrmService(SeriesBody.class).getTableName()+ " s" +
 				" On a." + COLUMN_ID + " = s." +COLUMN_ID_ANALYTE +
 				" Where s." +COLUMN_ID_SERIES + " = ?" +
 				" Group By a." +COLUMN_NAME ;
@@ -124,10 +150,12 @@ public class DatabaseService {
 					serBody.setAnalyte(analyte);
 					entry.getValue().getSeriesBody().add(serBody);
 					String injection = (cursor.getInt(2) == 0 ? "" : cursor.getInt(2) + "ul");
-					resultInnm.add("(" + entry.getKey() + ")" + cursor.getString(0) + " " + injection);
+					String pref = entry.getKey() == null ? "" : "(" + entry.getKey() + ")";
+					resultInnm.add(pref + cursor.getString(0) + " " + injection);
 					cursor.moveToNext();
 				}
 			}
+			else throw new IncompleteDataException();
 		}
 		String[] result = new String[resultInnm.size()];
 		for(int i=0;i<result.length;i++)
@@ -144,7 +172,7 @@ public class DatabaseService {
 		int i = 0;
 		for(Entry<String, SeriesHead> entry : seriesToShow.entrySet()) {
 			for(SeriesBody serBody : entry.getValue().getSeriesBody()) {
-				Cursor cursor = db.query(SeriesBody.TABLE_NAME,
+				Cursor cursor = db.query(OrmServicesFactory.getInstance().getOrmService(SeriesBody.class).getTableName(),
 						new String[]{COLUMN_VALUE}, 
 						COLUMN_ID_ANALYTE +"=" +serBody.getAnalyte().getId() +
 				" And " + COLUMN_ID_SERIES + "=" + entry.getValue().getId()						
@@ -166,7 +194,7 @@ public class DatabaseService {
 	public double[] getXAxisData(SQLiteDatabase db, Map<String, SeriesHead> seriesToShow) {
 		//assume that all series must have same X range, consequently get X range from 1st seriesBody
 		double[] result = null;
-		Cursor cursor = db.query(SeriesBody.TABLE_NAME,
+		Cursor cursor = db.query(OrmServicesFactory.getInstance().getOrmService(SeriesBody.class).getTableName(),
 				new String[]{COLUMN_TIME, COLUMN_ID}, 
 				COLUMN_ID_ANALYTE + "=" + seriesToShow.get("a").getSeriesBody().get(0).getAnalyte().getId() +
 				" And " + COLUMN_ID_SERIES + "=" + seriesToShow.get("a").getId()
@@ -180,6 +208,22 @@ public class DatabaseService {
 			}
 		}
 		return result;
+	}
+
+	public void deleteSeriesBody(SQLiteDatabase db, long idSeries, long idAnalyte) {
+		Cursor cursor = db.query(OrmServicesFactory.getInstance().getOrmService(SeriesBody.class).getTableName(),
+				new String[]{COLUMN_ID}, 
+				COLUMN_ID_ANALYTE + "=" + idAnalyte +
+				" And " + COLUMN_ID_SERIES + "=" +idSeries
+				, null, null, null, null);
+		if(cursor.moveToFirst()) {
+			while(!cursor.isAfterLast()) {
+				SeriesBody serBody = new SeriesBody();
+				serBody.setId(cursor.getLong(0));
+				OrmServicesFactory.getInstance().getOrmService(SeriesBody.class).delete(db, serBody);
+				cursor.moveToNext();
+			}
+		}
 	}
 		
 }

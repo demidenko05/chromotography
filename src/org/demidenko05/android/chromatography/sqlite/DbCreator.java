@@ -5,9 +5,10 @@
 
 package org.demidenko05.android.chromatography.sqlite;
 
-import java.util.HashSet;
+import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
+import org.demidenko05.android.chromatography.OrmServicesFactory;
+import org.demidenko05.android.chromatography.model.AbstractEntity;
 import org.demidenko05.android.chromatography.model.Analyte;
 import org.demidenko05.android.chromatography.model.Column;
 import org.demidenko05.android.chromatography.model.DbColumnType;
@@ -16,91 +17,95 @@ import org.demidenko05.android.chromatography.model.SeriesSolvents;
 import org.demidenko05.android.chromatography.model.SeriesBody;
 import org.demidenko05.android.chromatography.model.SeriesHead;
 import org.demidenko05.android.chromatography.model.Solvent;
-import org.demidenko05.android.chromatography.model.TableDescriptor;
 import android.database.sqlite.SQLiteDatabase;
 
 public class DbCreator {
-	
-	private Set<TableDescriptor> tables = new HashSet<TableDescriptor>();
 		
-	public DbCreator() {
-		tables.add(new Column());
-		tables.add(new Solvent());
-		tables.add(new Detector());
-		tables.add(new Analyte());
-		tables.add(new SeriesHead());
-		tables.add(new SeriesBody());
-		tables.add(new SeriesSolvents());
-	}
-	
+	@SuppressWarnings("rawtypes")
 	public void createAndPopulate(SQLiteDatabase db) {
+		Map<Class<? extends AbstractEntity>, OrmService> ormServices = OrmServicesFactory.getInstance().getOrmServices();
 		//create:
-		for(TableDescriptor table : tables) {
-			String createQuery = "Create Table " + table.getTableName() + "(";
+		for(Entry<Class<? extends AbstractEntity>, OrmService> entry : ormServices.entrySet()) {
+			String createQuery = "Create Table " + entry.getValue().getTableName() + "(";
 			boolean itIsFirst = true;
-			for(Entry<String, TableDescriptor.ColumnDescriptor> entry : table.getColumsDescriptor().entrySet()) {
+			@SuppressWarnings("unchecked")
+			Map<String, OrmService.ColumnDescriptor> colmDscrs = entry.getValue().getColumsDescriptor();
+			for(Entry<String, OrmService.ColumnDescriptor> entryClm : colmDscrs.entrySet()) {
 				if(!itIsFirst) createQuery += ", ";
 				else itIsFirst = false;
-				if(entry.getValue().getType().equals(DbColumnType.FOREIGN_KEY))
-					createQuery += entry.getValue().getColumnDefinition();
+				if(entryClm.getValue().getType().equals(DbColumnType.FOREIGN_KEY))
+					createQuery += entryClm.getValue().getColumnDefinition();
 				else
-					createQuery += entry.getKey() + " " +entry.getValue().getColumnDefinition();
+					createQuery += entryClm.getKey() + " " +entryClm.getValue().getColumnDefinition();
 			}
 			createQuery += ");";
 			db.execSQL(createQuery);
 		}
 		//populate:
-		DatabaseService databaseService = DatabaseService.getInstance();
 		//Columns:
 	    Column columnPc = new Column(); columnPc.setName("Primesep C");
-	    columnPc.setId(databaseService.insert(db, columnPc));
+	    columnPc.setId(OrmServicesFactory.getInstance().getOrmService(Column.class).insert(db, columnPc));
 	    Column columnP100 = new Column(); columnP100.setName("Primesep 100");
-	    columnP100.setId(databaseService.insert(db, columnP100));
+	    columnP100.setId(OrmServicesFactory.getInstance().getOrmService(Column.class).insert(db, columnP100));
 	    Column columnOblN = new Column(); columnOblN.setName("Obelisc N");
-	    columnOblN.setId(databaseService.insert(db, columnOblN));
+	    columnOblN.setId(OrmServicesFactory.getInstance().getOrmService(Column.class).insert(db, columnOblN));
 	    //Detectors:
 	    Detector detectUv = new Detector(); detectUv.setName("UV Detection");
-	    detectUv.setId(databaseService.insert(db, detectUv));
+	    detectUv.setId(OrmServicesFactory.getInstance().getOrmService(Detector.class).insert(db, detectUv));
 	    Detector detectelsd = new Detector(); detectelsd.setName("ELSD Detection");
-	    detectelsd.setId(databaseService.insert(db, detectelsd));
+	    detectelsd.setId(OrmServicesFactory.getInstance().getOrmService(Detector.class).insert(db, detectelsd));
 	    Detector detectMs = new Detector(); detectMs.setName("MS Detection");
-	    detectMs.setId(databaseService.insert(db, detectMs));
+	    detectMs.setId(OrmServicesFactory.getInstance().getOrmService(Detector.class).insert(db, detectMs));
 	    //Analytes:
 	    Analyte analyteBnz = new Analyte(); analyteBnz.setName("Benzoquinone");
-	    analyteBnz.setId(databaseService.insert(db, analyteBnz));
+	    analyteBnz.setId(OrmServicesFactory.getInstance().getOrmService(Analyte.class).insert(db, analyteBnz));
 	    Analyte analyteBenzil = new Analyte(); analyteBenzil.setName("Benzylamine");
-	    analyteBenzil.setId(databaseService.insert(db, analyteBenzil));
+	    analyteBenzil.setId(OrmServicesFactory.getInstance().getOrmService(Analyte.class).insert(db, analyteBenzil));
 	    Analyte analyteAcid = new Analyte(); analyteAcid.setName("Aspartic Acid");
-	    analyteAcid.setId(databaseService.insert(db, analyteAcid));
+	    analyteAcid.setId(OrmServicesFactory.getInstance().getOrmService(Analyte.class).insert(db, analyteAcid));
 	    Analyte analyteSAcid = new Analyte(); analyteSAcid.setName("Succinic Acid");
-	    analyteSAcid.setId(databaseService.insert(db, analyteSAcid));
+	    analyteSAcid.setId(OrmServicesFactory.getInstance().getOrmService(Analyte.class).insert(db, analyteSAcid));
 	    Analyte analytePhlm = new Analyte(); analytePhlm.setName("Phenylalanine");
-	    analytePhlm.setId(databaseService.insert(db, analytePhlm));
+	    analytePhlm.setId(OrmServicesFactory.getInstance().getOrmService(Analyte.class).insert(db, analytePhlm));
 	    Analyte analytePhenol = new Analyte(); analytePhenol.setName("Phenol");
-	    analytePhenol.setId(databaseService.insert(db, analytePhenol));
+	    analytePhenol.setId(OrmServicesFactory.getInstance().getOrmService(Analyte.class).insert(db, analytePhenol));
 	    Analyte analyteCaffeine = new Analyte(); analyteCaffeine.setName("Caffeine");
-	    analyteCaffeine.setId(databaseService.insert(db, analyteCaffeine));
+	    analyteCaffeine.setId(OrmServicesFactory.getInstance().getOrmService(Analyte.class).insert(db, analyteCaffeine));
+	    Analyte anFumaricAcid = new Analyte(); anFumaricAcid.setName("Fumaric Acid");
+	    anFumaricAcid.setId(OrmServicesFactory.getInstance().getOrmService(Analyte.class).insert(db, anFumaricAcid));
+	    Analyte anHydroxybenzoicAcid = new Analyte(); anHydroxybenzoicAcid.setName("Hydroxybenzoic Acid");
+	    anHydroxybenzoicAcid.setId(OrmServicesFactory.getInstance().getOrmService(Analyte.class).insert(db, anHydroxybenzoicAcid));
+	    Analyte anMalicAcid = new Analyte(); anMalicAcid.setName("Malic Acid");
+	    anMalicAcid.setId(OrmServicesFactory.getInstance().getOrmService(Analyte.class).insert(db, anMalicAcid));
+	    Analyte anMandelicAcid = new Analyte(); anMandelicAcid.setName("Mandelic Acid");
+	    anMandelicAcid.setId(OrmServicesFactory.getInstance().getOrmService(Analyte.class).insert(db, anMandelicAcid));
+	    Analyte anMethylmalonicAcid = new Analyte(); anMethylmalonicAcid.setName("Methylmalonic Acid");
+	    anMethylmalonicAcid.setId(OrmServicesFactory.getInstance().getOrmService(Analyte.class).insert(db, anMethylmalonicAcid));
+	    Analyte anTartaricAcid = new Analyte(); anTartaricAcid.setName("Tartaric Acid");
+	    anTartaricAcid.setId(OrmServicesFactory.getInstance().getOrmService(Analyte.class).insert(db, anTartaricAcid));
 	    //Solvents:
 	    Solvent slWater = new Solvent(); slWater.setName("Water");
-	    slWater.setId(databaseService.insert(db, slWater));
+	    slWater.setId(OrmServicesFactory.getInstance().getOrmService(Solvent.class).insert(db, slWater));
 	    Solvent slAcn = new Solvent(); slAcn.setName("cetonitrile (MeCN, ACN)");
-	    slAcn.setId(databaseService.insert(db, slAcn));
+	    slAcn.setId(OrmServicesFactory.getInstance().getOrmService(Solvent.class).insert(db, slAcn));
 	    Solvent slTfa = new Solvent(); slTfa.setName("trifluoroacetic acid (TFA)");
-	    slTfa.setId(databaseService.insert(db, slTfa));
-	    Solvent slAmmac = new Solvent(); slAmmac.setName("ammonium acetate)");
-	    slAmmac.setId(databaseService.insert(db, slAmmac));
+	    slTfa.setId(OrmServicesFactory.getInstance().getOrmService(Solvent.class).insert(db, slTfa));
+	    Solvent slAmmac = new Solvent(); slAmmac.setName("ammonium acetate (AmAc)");
+	    slAmmac.setId(OrmServicesFactory.getInstance().getOrmService(Solvent.class).insert(db, slAmmac));
+	    Solvent slAmFm = new Solvent(); slAmFm.setName("ammonium formate (AmFm)");
+	    slAmFm.setId(OrmServicesFactory.getInstance().getOrmService(Solvent.class).insert(db, slAmFm));
 	    //Series heads:
 	    SeriesHead series1 = new SeriesHead();
 	    series1.setName("Dewetting Study 5min");
 	    series1.setColumn(columnP100);
 	    series1.setDetector(detectUv);
 	    series1.setWavelength(270);
-	    series1.setId(databaseService.insert(db, series1));
+	    series1.setId(OrmServicesFactory.getInstance().getOrmService(SeriesHead.class).insert(db, series1));
 	    SeriesSolvents serSlv1 = new SeriesSolvents();
 	    serSlv1.setSolvent(slWater);
 	    serSlv1.setSeriesHead(series1);
 	    serSlv1.setAmount("100%");    
-	    databaseService.insert(db, serSlv1);
+	    OrmServicesFactory.getInstance().getOrmService(SeriesSolvents.class).insert(db, serSlv1);
 	    SeriesBody serBd;
 	    for(int i=0;i<=25;i++) {
 	    	serBd = new SeriesBody();
@@ -116,24 +121,24 @@ public class DbCreator {
 	    	else
 	    		serBd.setValue(0);
 	    	serBd.setTime(Double.valueOf(i)/5);
-	    	databaseService.insert(db, serBd);
+	    	OrmServicesFactory.getInstance().getOrmService(SeriesBody.class).insert(db, serBd);
 	    }
 	    SeriesHead series2 = new SeriesHead();
 	    series2.setName("Dewetting Study 5 min");
 	    series2.setColumn(columnP100);
 	    series2.setDetector(detectUv);
 	    series2.setWavelength(270);
-	    series2.setId(databaseService.insert(db, series2));
+	    series2.setId(OrmServicesFactory.getInstance().getOrmService(SeriesHead.class).insert(db, series2));
 	    serSlv1 = new SeriesSolvents();
 	    serSlv1.setSolvent(slWater);
 	    serSlv1.setSeriesHead(series2);
 	    serSlv1.setAmount("85%");    
-	    databaseService.insert(db, serSlv1);
+	    OrmServicesFactory.getInstance().getOrmService(SeriesSolvents.class).insert(db, serSlv1);
 	    serSlv1 = new SeriesSolvents();
 	    serSlv1.setSolvent(slAcn);
 	    serSlv1.setSeriesHead(series2);
 	    serSlv1.setAmount("15%");    
-	    databaseService.insert(db, serSlv1);
+	    OrmServicesFactory.getInstance().getOrmService(SeriesSolvents.class).insert(db, serSlv1);
 	    for(int i=0;i<=25;i++) {
 	    	serBd = new SeriesBody();
 	    	serBd.setSeriesHead(series2);
@@ -148,7 +153,7 @@ public class DbCreator {
 	    	else
 	    		serBd.setValue(100);
 	    	serBd.setTime(Double.valueOf(i)/5);
-	    	databaseService.insert(db, serBd);
+	    	OrmServicesFactory.getInstance().getOrmService(SeriesBody.class).insert(db, serBd);
 	    }
 	    SeriesHead series3 = new SeriesHead();
 	    series3.setName("Cation Exchange 9min");
@@ -156,22 +161,22 @@ public class DbCreator {
 	    series3.setDetector(detectUv);
 	    series3.setFlowRate("1.0 mL/min");
 	    series3.setWavelength(210);
-	    series3.setId(databaseService.insert(db, series3));
+	    series3.setId(OrmServicesFactory.getInstance().getOrmService(SeriesHead.class).insert(db, series3));
 	    serSlv1 = new SeriesSolvents();
 	    serSlv1.setSolvent(slWater);
 	    serSlv1.setSeriesHead(series3);
 	    serSlv1.setAmount("60%");    
-	    databaseService.insert(db, serSlv1);
+	    OrmServicesFactory.getInstance().getOrmService(SeriesSolvents.class).insert(db, serSlv1);
 	    serSlv1 = new SeriesSolvents();
 	    serSlv1.setSolvent(slAcn);
 	    serSlv1.setSeriesHead(series3);
 	    serSlv1.setAmount("40%");    
-	    databaseService.insert(db, serSlv1);
+	    OrmServicesFactory.getInstance().getOrmService(SeriesSolvents.class).insert(db, serSlv1);
 	    serSlv1 = new SeriesSolvents();
 	    serSlv1.setSolvent(slTfa);
 	    serSlv1.setSeriesHead(series3);
 	    serSlv1.setAmount("0.1 pH 2.0");    
-	    databaseService.insert(db, serSlv1);
+	    OrmServicesFactory.getInstance().getOrmService(SeriesSolvents.class).insert(db, serSlv1);
 	    for(int i=0;i<=18;i++) {
 	    	serBd = new SeriesBody();
 	    	serBd.setAnalyte(analyteBenzil);
@@ -181,7 +186,7 @@ public class DbCreator {
 	    	else
 	    		serBd.setValue(0);
 	    	serBd.setTime(Double.valueOf(i)/2);
-	    	databaseService.insert(db, serBd);
+	    	OrmServicesFactory.getInstance().getOrmService(SeriesBody.class).insert(db, serBd);
 	    }
 	    for(int i=0;i<=18;i++) {
 	    	serBd = new SeriesBody();
@@ -192,7 +197,7 @@ public class DbCreator {
 	    	else
 	    		serBd.setValue(0);
 	    	serBd.setTime(Double.valueOf(i)/2);
-	    	databaseService.insert(db, serBd);
+	    	OrmServicesFactory.getInstance().getOrmService(SeriesBody.class).insert(db, serBd);
 	    }
 	    for(int i=0;i<=18;i++) {
 	    	serBd = new SeriesBody();
@@ -203,7 +208,7 @@ public class DbCreator {
 	    	else
 	    		serBd.setValue(0);
 	    	serBd.setTime(Double.valueOf(i)/2);
-	    	databaseService.insert(db, serBd);
+	    	OrmServicesFactory.getInstance().getOrmService(SeriesBody.class).insert(db, serBd);
 	    }
 	    SeriesHead series4 = new SeriesHead();
 	    series4.setName("Cation Exchange 9min");
@@ -211,22 +216,22 @@ public class DbCreator {
 	    series4.setDetector(detectUv);
 	    series4.setFlowRate("1.0 mL/min");
 	    series4.setWavelength(210);
-	    series4.setId(databaseService.insert(db, series4));
+	    series4.setId(OrmServicesFactory.getInstance().getOrmService(SeriesHead.class).insert(db, series4));
 	    serSlv1 = new SeriesSolvents();
 	    serSlv1.setSolvent(slWater);
 	    serSlv1.setSeriesHead(series4);
 	    serSlv1.setAmount("60%");    
-	    databaseService.insert(db, serSlv1);
+	    OrmServicesFactory.getInstance().getOrmService(SeriesSolvents.class).insert(db, serSlv1);
 	    serSlv1 = new SeriesSolvents();
 	    serSlv1.setSolvent(slAcn);
 	    serSlv1.setSeriesHead(series4);
 	    serSlv1.setAmount("40%");    
-	    databaseService.insert(db, serSlv1);
+	    OrmServicesFactory.getInstance().getOrmService(SeriesSolvents.class).insert(db, serSlv1);
 	    serSlv1 = new SeriesSolvents();
 	    serSlv1.setSolvent(slAmmac);
 	    serSlv1.setSeriesHead(series4);
 	    serSlv1.setAmount("20mM pH 5.0");    
-	    databaseService.insert(db, serSlv1);
+	    OrmServicesFactory.getInstance().getOrmService(SeriesSolvents.class).insert(db, serSlv1);
 	    for(int i=0;i<=18;i++) {
 	    	serBd = new SeriesBody();
 	    	serBd.setAnalyte(analyteBenzil);
@@ -236,7 +241,7 @@ public class DbCreator {
 	    	else
 	    		serBd.setValue(0);
 	    	serBd.setTime(Double.valueOf(i)/2);
-	    	databaseService.insert(db, serBd);
+	    	OrmServicesFactory.getInstance().getOrmService(SeriesBody.class).insert(db, serBd);
 	    }
 	    for(int i=0;i<=18;i++) {
 	    	serBd = new SeriesBody();
@@ -247,7 +252,7 @@ public class DbCreator {
 	    	else
 	    		serBd.setValue(0);
 	    	serBd.setTime(Double.valueOf(i)/2);
-	    	databaseService.insert(db, serBd);
+	    	OrmServicesFactory.getInstance().getOrmService(SeriesBody.class).insert(db, serBd);
 	    }
 	    for(int i=0;i<=18;i++) {
 	    	serBd = new SeriesBody();
@@ -258,16 +263,8 @@ public class DbCreator {
 	    	else
 	    		serBd.setValue(0);
 	    	serBd.setTime(Double.valueOf(i)/2);
-	    	databaseService.insert(db, serBd);
+	    	OrmServicesFactory.getInstance().getOrmService(SeriesBody.class).insert(db, serBd);
 	    }
 	}
 	
-	public Set<TableDescriptor> getTables() {
-		return tables;
-	}
-
-	public void setTables(Set<TableDescriptor> tables) {
-		this.tables = tables;
-	}
-
 }

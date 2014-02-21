@@ -2,10 +2,12 @@ package org.demidenko05.android.chromatography;
 
 import java.util.List;
 import org.demidenko05.android.chromatography.model.AbstractEntityWithName;
+import org.demidenko05.android.chromatography.model.Analyte;
 import org.demidenko05.android.chromatography.model.Column;
 import org.demidenko05.android.chromatography.model.Detector;
-import org.demidenko05.android.chromatography.sqlite.DatabaseService;
+import org.demidenko05.android.chromatography.model.Solvent;
 import org.demidenko05.android.chromatography.sqlite.Datasource;
+import org.demidenko05.android.chromatography.sqlite.OrmService;
 import org.demidenko05.android.chromatography.R;
 import android.os.Bundle;
 import android.app.AlertDialog;
@@ -23,7 +25,6 @@ import android.widget.TextView;
 public class PickerForSingleActivity extends ListActivity {
 
 	private Datasource ds;
-	private DatabaseService databaseService = DatabaseService.getInstance();
 	private SQLiteDatabase db;
 	private List<? extends AbstractEntityWithName> list;
 	private TextView txtTitlePickerSingle;
@@ -32,19 +33,29 @@ public class PickerForSingleActivity extends ListActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_picker_for_single);
-		int filterFor = getIntent().getExtras().getInt(StoredDataActivity.FILTER_FOR);
+		int filterFor = getIntent().getExtras().getInt(CommunicateSchema.PICKER_FOR);
 		ds = Datasource.getInstance();
 		db = ds.getDbToRead();
 		txtTitlePickerSingle = (TextView) findViewById(R.id.txtTitlePickerSingle);
 		switch (filterFor) {
-		case StoredDataActivity.REQUEST_COLUMN:
-			list = databaseService.getEntities(db, new Column(), null, null, null, null, null);
+		case CommunicateSchema.REQUEST_COLUMN:
+			list = OrmServicesFactory.getInstance().getOrmService(Column.class).getEntities(db, null, null, null, null, OrmService.COLUMN_NAME);
 			txtTitlePickerSingle.setText(this.getString(R.string.select_an_item)+" of columns:");
 			break;
 
-		case StoredDataActivity.REQUEST_DETECTOR:
-			list = databaseService.getEntities(db, new Detector(), null, null, null, null, null);
+		case CommunicateSchema.REQUEST_DETECTOR:
+			list = OrmServicesFactory.getInstance().getOrmService(Detector.class).getEntities(db, null, null, null, null, OrmService.COLUMN_NAME);
 			txtTitlePickerSingle.setText(this.getString(R.string.select_an_item)+" of detectors:");
+			break;
+		
+		case CommunicateSchema.REQUEST_SOLVENT:
+			list = OrmServicesFactory.getInstance().getOrmService(Solvent.class).getEntities(db, null, null, null, null, OrmService.COLUMN_NAME);
+			txtTitlePickerSingle.setText(this.getString(R.string.select_an_item)+" of solvents:");
+			break;
+		
+		case CommunicateSchema.REQUEST_ANALYTE:
+			list = OrmServicesFactory.getInstance().getOrmService(Analyte.class).getEntities(db, null, null, null, null, OrmService.COLUMN_NAME);
+			txtTitlePickerSingle.setText(this.getString(R.string.select_an_item)+" of analytes:");
 			break;
 		}
 		@SuppressWarnings({ "rawtypes", "unchecked" })

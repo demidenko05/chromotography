@@ -16,6 +16,7 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:layout_marginTop="40dp"
+        android:onClick="onClick"
         android:text="@string/button_stored_data" />
 
     <Button
@@ -25,6 +26,7 @@
         android:layout_alignLeft="@+id/buttonShowStoredData"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/buttonShowStoredData"
+         android:onClick="onClick"
         android:layout_marginTop="20dp"
         android:text="@string/button_get_new_data" />
 

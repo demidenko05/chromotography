@@ -1,0 +1,114 @@
+<LinearLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="fill_parent"
+android:orientation="vertical" 
+>
+
+    <TextView
+        android:id="@+id/tvName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/description" />
+    
+    <EditText
+        android:id="@+id/editName"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="text">
+    	<requestFocus />
+    </EditText>
+    
+    <TextView
+        android:id="@+id/tvSelectColumn"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/column" />
+    
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+	    <EditText
+	        android:id="@+id/editColumn"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:ems="10"
+	        android:enabled="false"
+	        android:inputType="text" />
+	
+	    <Button
+	        android:id="@+id/btnSelectColumn"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:onClick="onClick"
+	        android:text="@string/select" />
+    </LinearLayout>
+	    
+    <TextView
+        android:id="@+id/tvSelectDetector"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/detector" />
+    
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+    	    <EditText
+	        android:id="@+id/editDetector"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_marginTop="8dp"
+	        android:enabled="false"
+	        android:ems="10"
+	        android:inputType="text" >
+	    </EditText>
+	
+	    <Button
+	        android:id="@+id/btnSelectDetector"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:onClick="onClick"
+	        android:text="@string/select" />
+    </LinearLayout>
+    
+    <TextView
+        android:id="@+id/tvWavelength"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/wavelength" />
+    
+    <EditText
+        android:id="@+id/edWavelength"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="number">
+    </EditText>
+       
+    <TextView
+        android:id="@+id/tvFlowRate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/flow_rate" />
+    
+    <EditText
+        android:id="@+id/edFlowRate"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="text">
+    </EditText>
+       
+    <TextView
+        android:id="@+id/tvSolvents"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="@string/mobile_phase" />
+
+
+</LinearLayout>

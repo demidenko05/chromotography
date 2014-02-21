@@ -1,8 +1,11 @@
 package org.demidenko05.android.chromatography;
 
-import org.demidenko05.android.chromatography.model.TableDescriptor;
+import java.util.Map;
+import java.util.Map.Entry;
+import org.demidenko05.android.chromatography.model.AbstractEntity;
 import org.demidenko05.android.chromatography.sqlite.Datasource;
 import org.demidenko05.android.chromatography.sqlite.DbCreator;
+import org.demidenko05.android.chromatography.sqlite.OrmService;
 import org.demidenko05.android.chromatography.R;
 import android.os.Bundle;
 import android.app.Activity;
@@ -26,8 +29,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
 		ds = Datasource.getInstance();
 		ds.init(getApplicationContext());
         setContentView(R.layout.activity_main);
-       	findViewById(R.id.buttonShowStoredData).setOnClickListener(this);
-       	findViewById(R.id.buttonGetNewData).setOnClickListener(this);
     }
 
 	@Override
@@ -46,7 +47,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 		    builder
 		    .setTitle(R.string.recreate_db)
 		    .setMessage(R.string.are_you_sure)
-		    .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+		    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 	    	public void onClick(DialogInterface dialog, int id) {
 	    		dialog.cancel();
 	    	}})
@@ -54,8 +55,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
 		    	public void onClick(DialogInterface dialog, int id) {
 		    		db = ds.getDbToWrite();
 		    		DbCreator dbCreator = new DbCreator();
-		    		for(TableDescriptor table : dbCreator.getTables()) {
-		    		    db.execSQL("DROP TABLE IF EXISTS " + table.getTableName());
+		    		@SuppressWarnings("rawtypes")
+					Map<Class<? extends AbstractEntity>, OrmService> ormServices = OrmServicesFactory.getInstance().getOrmServices();
+		    		for(@SuppressWarnings("rawtypes") Entry<Class<? extends AbstractEntity>, OrmService> entry : ormServices.entrySet()) {
+		    		    db.execSQL("DROP TABLE IF EXISTS " + entry.getValue().getTableName());
 		    		}
 		    		dbCreator.createAndPopulate(db);
 		    	}})
@@ -69,12 +72,14 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
 	@Override
 	public void onClick(View view) {
+		Intent intent;
 	    switch (view.getId()) {
 		case R.id.buttonGetNewData:
-			
+			intent = new Intent(this, CreateSeriesActivity.class);
+			startActivity(intent);
 			break;
 		case R.id.buttonShowStoredData:
-			Intent intent = new Intent(this, StoredDataActivity.class);
+			intent = new Intent(this, StoredDataActivity.class);
 			startActivity(intent);
 			break;
 		}

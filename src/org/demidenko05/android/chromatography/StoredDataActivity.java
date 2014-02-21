@@ -4,21 +4,20 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.demidenko05.android.Miscellaneous;
 import org.demidenko05.android.chromatography.provider.ContentProviderForChartdroid;
+import org.demidenko05.android.chromatography.exception.IncompleteDataException;
 import org.demidenko05.android.chromatography.exception.SeriesNotSameDurationException;
 import org.demidenko05.android.chromatography.model.Column;
 import org.demidenko05.android.chromatography.model.Detector;
 import org.demidenko05.android.chromatography.model.SeriesHead;
-import org.demidenko05.android.chromatography.model.TableDescriptor;
 import org.demidenko05.android.chromatography.sqlite.DatabaseService;
 import org.demidenko05.android.chromatography.sqlite.Datasource;
+import org.demidenko05.android.chromatography.sqlite.OrmService;
 import org.demidenko05.android.chromatography.R;
 import android.os.Bundle;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ListActivity;
-import android.app.AlertDialog.Builder;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -32,9 +31,6 @@ import android.widget.TextView;
 
 public class StoredDataActivity extends ListActivity {
 
-	public static final int REQUEST_COLUMN = 0;
-	public static final int REQUEST_DETECTOR = 1;
-	public static final String FILTER_FOR = "Filter for";
 	private Datasource ds;
 	private DatabaseService databaseService = DatabaseService.getInstance();
 	private DataToPlot dataToPlot = DataToPlot.getInstance();
@@ -51,10 +47,16 @@ public class StoredDataActivity extends ListActivity {
 		setContentView(R.layout.activity_stored_data);
 		ds = Datasource.getInstance();
 		txtTitleStoredData = (TextView) findViewById(R.id.txtTitleStoredData);
-		refreshList();
+		if(savedInstanceState != null) {//return from rotate
+			Long columnId = savedInstanceState.getLong(OrmService.COLUMN_ID_COLUMN);
+			if(columnId != null) filterColumn = OrmServicesFactory.getInstance().getOrmService(Column.class).getEntityById(getDbToRead(), columnId);
+			Long detectorId = savedInstanceState.getLong(OrmService.COLUMN_ID_DETECTOR);
+			if(detectorId != null) filterDetector = OrmServicesFactory.getInstance().getOrmService(Detector.class).getEntityById(getDbToRead(), detectorId);
+		}
 		arrAdapter = new ArrayAdapter<SeriesHead>(this, android.R.layout.simple_list_item_multiple_choice, list);
 		setListAdapter(arrAdapter);
 		getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+		refreshList();
 	}
 
 	@Override
@@ -70,14 +72,14 @@ public class StoredDataActivity extends ListActivity {
 	    switch (item.getItemId()) {
 		case R.id.action_filter_column:
 			intent = new Intent(this, PickerForSingleActivity.class);
-			intent.putExtra(FILTER_FOR, REQUEST_COLUMN);
-			startActivityForResult(intent, REQUEST_COLUMN);			
+			intent.putExtra(CommunicateSchema.PICKER_FOR, CommunicateSchema.REQUEST_COLUMN);
+			startActivityForResult(intent, CommunicateSchema.REQUEST_COLUMN);			
 			return true;
 
 		case R.id.act_fltr_detect:
 			intent = new Intent(this, PickerForSingleActivity.class);
-			intent.putExtra(FILTER_FOR, REQUEST_DETECTOR);
-			startActivityForResult(intent, REQUEST_DETECTOR);
+			intent.putExtra(CommunicateSchema.PICKER_FOR, CommunicateSchema.REQUEST_DETECTOR);
+			startActivityForResult(intent, CommunicateSchema.REQUEST_DETECTOR);
 			return true;
 			
 		case R.id.act_clear_fltcolumn:
@@ -85,7 +87,7 @@ public class StoredDataActivity extends ListActivity {
 				filterColumn = null;
 				refreshList();
 			}
-			else alertDlg(R.string.there_is_no_filter);
+			else Miscellaneous.alertDlg(R.string.there_is_no_filter, this);
 			return true;
 
 		case R.id.act_clear_fltdetector:
@@ -93,28 +95,20 @@ public class StoredDataActivity extends ListActivity {
 				filterDetector = null;
 				refreshList();
 			}
-			else alertDlg(R.string.there_is_no_filter);
+			else Miscellaneous.alertDlg(R.string.there_is_no_filter, this);
 			return true;
 
 		case R.id.act_show:
 			showDiagramm();
 			return true;
 
+		case R.id.act_edit:
+			editSeries();
+			return true;
+
 		default:
 	        return super.onOptionsItemSelected(item);
 	    }
-	}
-
-	private void alertDlg(int message) {
-		AlertDialog.Builder builder = new Builder(this);
-	    builder
-	    .setMessage(message)
-	    .setCancelable(false)
-	    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-	    	public void onClick(DialogInterface dialog, int id) {
-	    		dialog.cancel();
-	    	}})
-	    .show();
 	}
 
 	@Override
@@ -123,14 +117,14 @@ public class StoredDataActivity extends ListActivity {
 	    	String name = data.getStringExtra("name");
 	    	Long id = data.getLongExtra("id", -1L);
 	    	if(!id.equals(-1L)) {
-			    if (requestCode == REQUEST_COLUMN) {
+			    if (requestCode == CommunicateSchema.REQUEST_COLUMN) {
 			    	filterColumn = new Column(); filterColumn.setId(id); filterColumn.setName(name);
 			    }
-			    else if (requestCode == REQUEST_DETECTOR) {
+			    else if (requestCode == CommunicateSchema.REQUEST_DETECTOR) {
 			    	filterDetector = new Detector(); filterDetector.setId(id); filterDetector.setName(name);
 			    }
-			    refreshList();
 	    	}
+		    refreshList();
 	    }
 	}
 	
@@ -163,17 +157,39 @@ public class StoredDataActivity extends ListActivity {
 		return filterDetector.getName();
 	}
 	
+	protected void editSeries() {
+		SparseBooleanArray selPoss = getListView().getCheckedItemPositions();
+		if(selPoss == null || selPoss.size() == 0) {
+			Miscellaneous.alertDlg(R.string.pl_sel_ser_to_edit, this);
+        	return;
+		}
+		int j=0;
+		SeriesHead seriesToEdit = null;
+		for(int i=0;i<list.size();i++){
+			if(selPoss.get(i)) {
+				j++;
+				seriesToEdit = list.get(i);
+			}
+		}
+		if(j > 1 || j == 0) {
+			Miscellaneous.alertDlg(R.string.pl_sel_ser_to_show, this);
+        	return;
+		}
+		Intent intent = new Intent(this, CreateSeriesActivity.class);
+		intent.putExtra(OrmService.COLUMN_ID_SERIES, seriesToEdit.getId());
+		startActivityForResult(intent, CommunicateSchema.EDIT_SERIES);
+	}
 	private void showDiagramm() {
         Intent intent = new Intent(Intent.ACTION_VIEW, ContentProviderForChartdroid.PROVIDER_URI);
         PackageManager packageManager = getPackageManager();
         List<ResolveInfo> listPkg = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
         if(listPkg.size() <= 0) {
-        	alertDlg(R.string.need_chartdroid);
+        	Miscellaneous.alertDlg(R.string.need_chartdroid, this);
         	return;
         }
 		SparseBooleanArray selPoss = getListView().getCheckedItemPositions();
 		if(selPoss == null || selPoss.size() == 0) {
-        	alertDlg(R.string.pl_sel_ser_to_show);
+			Miscellaneous.alertDlg(R.string.pl_sel_ser_to_show, this);
         	return;
 		}
 		Map<String, SeriesHead> seriesToShow = new LinkedHashMap<String, SeriesHead>();
@@ -181,12 +197,15 @@ public class StoredDataActivity extends ListActivity {
 		//get selected series:
 		int j=0;
 		for(int i=0;i<list.size();i++){
-			//char[] letter = Character.toChars(Character.getNumericValue('a')+i);
 			if(selPoss.get(i)) {
 				char letter = (char) ('a'+j++);
 				seriesToShow.put(Character.toString(letter), list.get(i));
 				title += " (" +letter + ") " + list.get(i).getName();
 			}
+		}
+		if(seriesToShow.size() == 0) {
+			Miscellaneous.alertDlg(R.string.pl_sel_ser_to_show, this);
+        	return;
 		}
 		//put series to chart activity
 		try {
@@ -197,7 +216,9 @@ public class StoredDataActivity extends ListActivity {
 	        intent.putExtra(Intent.EXTRA_TITLE, title);
 			startActivity(intent);
 		} catch (SeriesNotSameDurationException e) {
-			alertDlg(R.string.ser_no_same_dur);
+			Miscellaneous.alertDlg(R.string.ser_no_same_dur, this);
+		} catch (IncompleteDataException e) {
+			Miscellaneous.alertDlg(R.string.incomplete_data, this);
 		}
 	}
 		
@@ -206,7 +227,7 @@ public class StoredDataActivity extends ListActivity {
 		String titleAdd = null;
 		if(filterColumn != null) {
 			titleAdd = " (for " +filterColumn.getName();
-			selection = " Where " + TableDescriptor.COLUMN_ID_COLUMN + " = " +filterColumn.getId();
+			selection = " Where " + OrmService.COLUMN_ID_COLUMN + " = " +filterColumn.getId();
 		}
 		if(filterDetector != null) {
 			if(titleAdd == null)
@@ -214,9 +235,9 @@ public class StoredDataActivity extends ListActivity {
 			else
 				titleAdd += " and " +filterDetector.getName();
 			if(selection.equals(""))
-				selection = " Where " + TableDescriptor.COLUMN_ID_DETECTOR + " = " +filterDetector.getId();
+				selection = " Where " + OrmService.COLUMN_ID_DETECTOR + " = " +filterDetector.getId();
 			else
-				selection += " And " + TableDescriptor.COLUMN_ID_DETECTOR + " = " +filterDetector.getId();
+				selection += " And " + OrmService.COLUMN_ID_DETECTOR + " = " +filterDetector.getId();
 		}
 		if(titleAdd == null) titleAdd = "";
 		else titleAdd += ")";
@@ -224,9 +245,20 @@ public class StoredDataActivity extends ListActivity {
 		txtTitleStoredData.setText(title+":");
 		if(list.size() > 0) list.clear();
 		databaseService.fillSeriesList(getDbToRead(), list, selection);
-		if(arrAdapter != null) arrAdapter.notifyDataSetChanged();
+		arrAdapter.notifyDataSetChanged();
 	}
 
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		if(filterColumn != null) {
+			outState.putLong(OrmService.COLUMN_ID_COLUMN, filterColumn.getId());
+		}
+		if(filterDetector != null) {
+			outState.putLong(OrmService.COLUMN_ID_DETECTOR, filterDetector.getId());
+		}
+		super.onSaveInstanceState(outState);
+	}
 
 	public Column getFilterColumn() {
 		return filterColumn;

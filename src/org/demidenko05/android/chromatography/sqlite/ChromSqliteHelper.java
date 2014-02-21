@@ -1,6 +1,9 @@
 package org.demidenko05.android.chromatography.sqlite;
 
-import org.demidenko05.android.chromatography.model.TableDescriptor;
+import java.util.Map;
+import java.util.Map.Entry;
+import org.demidenko05.android.chromatography.OrmServicesFactory;
+import org.demidenko05.android.chromatography.model.AbstractEntity;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -29,10 +32,13 @@ public class ChromSqliteHelper extends SQLiteOpenHelper {
 		recreate(db);
 	}
 
+	@SuppressWarnings("rawtypes")
 	public void recreate(SQLiteDatabase db) {
 		DbCreator dbCreator = new DbCreator();
-		for(TableDescriptor table : dbCreator.getTables()) {
-		    db.execSQL("DROP TABLE IF EXISTS " + table.getTableName());
+		Map<Class<? extends AbstractEntity>, OrmService> ormServices = OrmServicesFactory.getInstance().getOrmServices();
+		//create:
+		for(Entry<Class<? extends AbstractEntity>, OrmService> entry : ormServices.entrySet()) {
+		    db.execSQL("DROP TABLE IF EXISTS " + entry.getValue().getTableName());
 		}
 		dbCreator.createAndPopulate(db);
 	}

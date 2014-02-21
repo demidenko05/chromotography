@@ -5,18 +5,21 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="4"
-          />
+        android:minSdkVersion="5"
+        
+         />
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/logo"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
-      	<provider android:label="chromatography data to show"
-   			android:name="org.demidenko05.android.chromatography.provider.ContentProviderForChartdroid"
-	        android:authorities="org.demidenko05.android.chromatography.provider"
-		/>
+        android:theme="@style/AppTheme"  >
+        <provider
+            android:name="org.demidenko05.android.chromatography.provider.ContentProviderForChartdroid"
+            android:authorities="org.demidenko05.android.chromatography.provider"
+            android:exported="true"
+            android:label="chromatography data to show" />
+
         <activity
             android:name="org.demidenko05.android.chromatography.MainActivity"
             android:label="@string/app_name" >
@@ -34,6 +37,18 @@
             android:name="org.demidenko05.android.chromatography.PickerForSingleActivity"
             android:label="@string/title_activity_picker_for_single" >
         </activity>
-    </application>
+        <activity
+            android:name="org.demidenko05.android.chromatography.CreateSeriesActivity"
+            android:label="@string/title_activity_create_series" >
+        </activity>
+        <activity
+            android:name="org.demidenko05.android.chromatography.SeriesSolventsActivity"
+            android:label="@string/title_activity_series_solvents" >
+        </activity>
+        <activity
+            android:name="org.demidenko05.android.chromatography.SeriesBodyActivity"
+            android:label="@string/title_activity_series_body" >
+        </activity>
+        </application>
 
 </manifest>
