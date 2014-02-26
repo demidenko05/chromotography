@@ -13,8 +13,8 @@ import android.database.sqlite.SQLiteDatabase;
 
 public class OrmServiceSeriesHead extends OrmServiceEntityWithName<SeriesHead> {
 
-	public OrmServiceSeriesHead() {
-		super("series_head", SeriesHead.class);
+	public OrmServiceSeriesHead(SQLiteDatabase db) {
+		super("series_head", SeriesHead.class, db);
 	}
 
 	@Override
@@ -40,10 +40,10 @@ public class OrmServiceSeriesHead extends OrmServiceEntityWithName<SeriesHead> {
 	}
 
 	@Override
-	protected void fillEntity(SeriesHead entity, Cursor cursor, SQLiteDatabase db) {
-		super.fillEntity(entity, cursor, db);
-		entity.setColumn(OrmServicesFactory.getInstance().getOrmService(Column.class).getEntityById(db, cursor.getLong(2)));
-		entity.setDetector(OrmServicesFactory.getInstance().getOrmService(Detector.class).getEntityById(db, cursor.getLong(3)));
+	protected void fillEntity(SeriesHead entity, Cursor cursor) {
+		super.fillEntity(entity, cursor);
+		entity.setColumn(OrmServicesFactory.getInstance().getOrmService(Column.class).getEntityById(cursor.getLong(2)));
+		entity.setDetector(OrmServicesFactory.getInstance().getOrmService(Detector.class).getEntityById(cursor.getLong(3)));
 		entity.setWavelength(cursor.getInt(4));
 		entity.setFlowRate(cursor.getString(5));
 	}

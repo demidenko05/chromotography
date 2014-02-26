@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
     <item android:id="@+id/act_recreate" android:title="@string/recreate_db"></item>
+    <item android:id="@+id/act_testmultithreading" android:title="@string/act_test_multi_threading"/>
     
 
 </menu>

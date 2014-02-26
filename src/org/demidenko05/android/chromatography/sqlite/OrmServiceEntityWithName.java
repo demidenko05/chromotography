@@ -9,8 +9,8 @@ import android.database.sqlite.SQLiteDatabase;
 
 public class OrmServiceEntityWithName  <T extends AbstractEntityWithName> extends OrmService<T> {
 
-	public OrmServiceEntityWithName(String tableName, Class<T> entityClass) {
-		super(tableName, entityClass);
+	public OrmServiceEntityWithName(String tableName, Class<T> entityClass, SQLiteDatabase db) {
+		super(tableName, entityClass, db);
 	}
 
 	@Override
@@ -21,7 +21,7 @@ public class OrmServiceEntityWithName  <T extends AbstractEntityWithName> extend
 	}
 
 	@Override
-	protected void fillEntity(T entity, Cursor cursor, SQLiteDatabase db) {
+	protected void fillEntity(T entity, Cursor cursor) {
 		entity.setId(cursor.getLong(0));
 		entity.setName(cursor.getString(1));
 	}

@@ -9,14 +9,11 @@ import org.demidenko05.android.chromatography.model.Detector;
 import org.demidenko05.android.chromatography.model.SeriesHead;
 import org.demidenko05.android.chromatography.model.SeriesSolvents;
 import org.demidenko05.android.chromatography.sqlite.DatabaseService;
-import org.demidenko05.android.chromatography.sqlite.Datasource;
 import org.demidenko05.android.chromatography.sqlite.OrmService;
-
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,8 +24,6 @@ import android.widget.Toast;
 
 public class CreateSeriesActivity extends Activity {
 
-	private Datasource ds;
-	private SQLiteDatabase db;
 	private DatabaseService databaseService = DatabaseService.getInstance();
 	private EditText etName;
 	private EditText etColumn;
@@ -46,7 +41,6 @@ public class CreateSeriesActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_create_series);
-		ds = Datasource.getInstance();
 		expListView = (ExpandableListView) findViewById(R.id.elvSolvAnalyt);
 		listAdapter = new ExpandableListAdapter(this, solvents, analytes);
 		expListView.setAdapter(listAdapter);
@@ -69,12 +63,12 @@ public class CreateSeriesActivity extends Activity {
 				seriesHead = new SeriesHead();
 				Long columnId = savedInstanceState.getLong(OrmService.COLUMN_ID_COLUMN);
 				if(columnId != null) {
-					seriesHead.setColumn(OrmServicesFactory.getInstance().getOrmService(Column.class).getEntityById(getDbToRead(), columnId));
+					seriesHead.setColumn(OrmServicesFactory.getInstance().getOrmService(Column.class).getEntityById(columnId));
 					etColumn.setText(seriesHead.getColumn().getName());
 				}
 				Long detectorId = savedInstanceState.getLong(OrmService.COLUMN_ID_DETECTOR);
 				if(detectorId != null) {
-					seriesHead.setDetector(OrmServicesFactory.getInstance().getOrmService(Detector.class).getEntityById(getDbToRead(), detectorId));
+					seriesHead.setDetector(OrmServicesFactory.getInstance().getOrmService(Detector.class).getEntityById(detectorId));
 					etDetector.setText(seriesHead.getDetector().getName());
 				}
 			}
@@ -91,7 +85,7 @@ public class CreateSeriesActivity extends Activity {
 	}
 
 	protected void getSeriesHeadAndRefresh(long seriesId) {
-		seriesHead = OrmServicesFactory.getInstance().getOrmService(SeriesHead.class).getEntityById(getDbToRead(), seriesId);
+		seriesHead = OrmServicesFactory.getInstance().getOrmService(SeriesHead.class).getEntityById(seriesId);
 		refreshHeadFromEntity();
 		refreshAnalytes();
 		refreshSolvents();
@@ -127,14 +121,13 @@ public class CreateSeriesActivity extends Activity {
 					 && seriesHead.getName().equals(""))
 				Miscellaneous.alertDlg(R.string.must_complete_data, this);
 			else if(seriesHead.getId() < 1) {
-				seriesHead.setId(OrmServicesFactory.getInstance().getOrmService(SeriesHead.class).insert(getDbToWrite(), seriesHead));
+				seriesHead.setId(OrmServicesFactory.getInstance().getOrmService(SeriesHead.class).insert(seriesHead));
 				Toast.makeText(this, "Series head has been inserted!", Toast.LENGTH_SHORT).show();
 			}
 			else {
-				OrmServicesFactory.getInstance().getOrmService(SeriesHead.class).update(getDbToWrite(), seriesHead);
+				OrmServicesFactory.getInstance().getOrmService(SeriesHead.class).update(seriesHead);
 				Toast.makeText(this, "Series head has been updated!", Toast.LENGTH_SHORT).show();
 			}
-			closeDb();
 			return true;
 
 		case R.id.actAddSeriesLolvent:
@@ -223,53 +216,25 @@ public class CreateSeriesActivity extends Activity {
 	
 	protected void deleteSeriesSolvent(long idSeriesSolvent) {
 		SeriesSolvents seriesSolvents = new SeriesSolvents(); seriesSolvents.setId(idSeriesSolvent);
-		OrmServicesFactory.getInstance().getOrmService(SeriesSolvents.class).delete(getDbToWrite(), seriesSolvents );
-		closeDb();
+		OrmServicesFactory.getInstance().getOrmService(SeriesSolvents.class).delete(seriesSolvents );
 		refreshSolvents();
 		listAdapter.notifyDataSetChanged();
 	}
 	
 	protected void deleteSeriesBody(long idAnalyte) {
-		databaseService.deleteSeriesBody(getDbToWrite(), seriesHead.getId(), idAnalyte);
-		closeDb();
+		databaseService.deleteSeriesBody(seriesHead.getId(), idAnalyte);
 		refreshAnalytes();
 		listAdapter.notifyDataSetChanged();
 	}
 	
 	protected void refreshSolvents() {
 		if(solvents.size() > 0) solvents.clear();
-		databaseService.fillSeriesSolventsList(getDbToRead(), solvents, seriesHead.getId());
+		databaseService.fillSeriesSolventsList(solvents, seriesHead.getId());
 	}
 
 	protected void refreshAnalytes() {
 		if(analytes.size() > 0) analytes.clear();
-		databaseService.fillSeriesAnalyteList(getDbToRead(), analytes, seriesHead.getId());
-	}
-
-
-	@Override
-	protected void onPause() {
-		closeDb();
-		super.onPause();
-	}
-		
-	protected SQLiteDatabase getDbToRead() {
-		if(db == null)
-			db = ds.getDbToRead();
-		return db;
-	}
-	
-	protected SQLiteDatabase getDbToWrite() {
-		if(db == null || db.isReadOnly())
-			db = ds.getDbToWrite();
-		return db;
-	}
-	
-	protected void closeDb() {
-		if(db != null) {
-			db.close();
-			db = null;
-		}
+		databaseService.fillSeriesAnalyteList(analytes, seriesHead.getId());
 	}
 
 	@Override

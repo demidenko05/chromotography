@@ -4,14 +4,12 @@ import org.demidenko05.android.Miscellaneous;
 import org.demidenko05.android.chromatography.model.SeriesHead;
 import org.demidenko05.android.chromatography.model.SeriesBody;
 import org.demidenko05.android.chromatography.model.Analyte;
-import org.demidenko05.android.chromatography.sqlite.Datasource;
 import org.demidenko05.android.chromatography.sqlite.OrmService;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.app.Activity;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 
 public class SeriesBodyActivity extends Activity {
 	
@@ -25,14 +23,11 @@ public class SeriesBodyActivity extends Activity {
 	private EditText etRetentionAt;
 	private EditText etTimeSeries;
 	private double[] timeSeries;
-	private Datasource ds;
-	private SQLiteDatabase db;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_series_body);
-		ds = Datasource.getInstance();
 		etAnalyte = (EditText) findViewById(R.id.edAnalyte);
 		etInjection = (EditText) findViewById(R.id.edInjection);
 		etDuration = (EditText) findViewById(R.id.edDuration);
@@ -47,7 +42,7 @@ public class SeriesBodyActivity extends Activity {
 			idAnalyte = savedInstanceState.getLong(OrmService.COLUMN_ID_ANALYTE);
 			timeSeries = savedInstanceState.getDoubleArray(CommunicateSchema.TIMES_SERIES_ARRAY);
 			if(idAnalyte != 0) {
-				seriesBody.setAnalyte(OrmServicesFactory.getInstance().getOrmService(Analyte.class).getEntityById(getDbToRead(), idAnalyte));
+				seriesBody.setAnalyte(OrmServicesFactory.getInstance().getOrmService(Analyte.class).getEntityById(idAnalyte));
 				etAnalyte.setText(seriesBody.getAnalyte().getName());
 			}
 		}
@@ -107,7 +102,7 @@ public class SeriesBodyActivity extends Activity {
 				for(Double value : timeSeries) {
 					seriesBody.setTime(Double.valueOf(i++)/stepsInMunute);
 					seriesBody.setValue(value);
-					OrmServicesFactory.getInstance().getOrmService(SeriesBody.class).insert(getDbToWrite(), seriesBody);
+					OrmServicesFactory.getInstance().getOrmService(SeriesBody.class).insert(seriesBody);
 				}
 				Intent data = new Intent();
 				setResult(RESULT_OK, data);
@@ -131,12 +126,6 @@ public class SeriesBodyActivity extends Activity {
 	    	}
 	    }
 	}
-
-	@Override
-	protected void onPause() {
-		closeDb();
-		super.onPause();
-	}
 	
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
@@ -148,25 +137,6 @@ public class SeriesBodyActivity extends Activity {
 			outState.putDoubleArray(CommunicateSchema.TIMES_SERIES_ARRAY, timeSeries);
 		}
 		super.onSaveInstanceState(outState);
-	}
-
-	protected SQLiteDatabase getDbToRead() {
-		if(db == null)
-			db = ds.getDbToRead();
-		return db;
-	}
-	
-	protected SQLiteDatabase getDbToWrite() {
-		if(db == null || db.isReadOnly())
-			db = ds.getDbToWrite();
-		return db;
-	}
-	
-	protected void closeDb() {
-		if(db != null) {
-			db.close();
-			db = null;
-		}
 	}
 
 }

@@ -30,15 +30,16 @@ public final class R {
     public static final class id {
         public static final int actAddSeriesBody=0x7f080031;
         public static final int actAddSeriesLolvent=0x7f080030;
-        public static final int act_apply=0x7f080033;
-        public static final int act_clear_fltcolumn=0x7f080036;
-        public static final int act_clear_fltdetector=0x7f080037;
-        public static final int act_edit=0x7f080039;
-        public static final int act_fltr_detect=0x7f080035;
+        public static final int act_apply=0x7f080034;
+        public static final int act_clear_fltcolumn=0x7f080037;
+        public static final int act_clear_fltdetector=0x7f080038;
+        public static final int act_edit=0x7f08003a;
+        public static final int act_fltr_detect=0x7f080036;
         public static final int act_recreate=0x7f080032;
-        public static final int act_show=0x7f080038;
+        public static final int act_show=0x7f080039;
         public static final int act_store_series=0x7f08002f;
-        public static final int action_filter_column=0x7f080034;
+        public static final int act_testmultithreading=0x7f080033;
+        public static final int action_filter_column=0x7f080035;
         public static final int btnDelete=0x7f08002d;
         public static final int btnEditItem=0x7f08002e;
         public static final int btnGenerateTimeSeries=0x7f080015;
@@ -106,6 +107,7 @@ public final class R {
         public static final int stored_data=0x7f070003;
     }
     public static final class string {
+        public static final int act_test_multi_threading=0x7f050041;
         public static final int action_settings=0x7f050001;
         public static final int amount=0x7f05002d;
         public static final int analyte=0x7f050035;

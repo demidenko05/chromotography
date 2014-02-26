@@ -66,5 +66,6 @@
     <string name="time_series">Time series:</string>
     <string name="title_activity_series_body">Add analyte and time series of retention of it</string>
     <string name="delete">Delete</string>
+    <string name="act_test_multi_threading">Run two treads. Every of them will inserted 20 analytes</string>
     
 </resources>

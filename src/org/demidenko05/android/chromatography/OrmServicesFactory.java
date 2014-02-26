@@ -16,6 +16,8 @@ import org.demidenko05.android.chromatography.sqlite.OrmServiceSeriesBody;
 import org.demidenko05.android.chromatography.sqlite.OrmServiceSeriesHead;
 import org.demidenko05.android.chromatography.sqlite.OrmServiceSeriesSolvents;
 
+import android.database.sqlite.SQLiteDatabase;
+
 public class OrmServicesFactory {
 	
 	private static final OrmServicesFactory instance = new OrmServicesFactory();
@@ -26,15 +28,15 @@ public class OrmServicesFactory {
 	}
 	
 	@SuppressWarnings("rawtypes")
-	public OrmServicesFactory () {
+	public void init(SQLiteDatabase db) {
 		ormServices = new LinkedHashMap<Class<? extends AbstractEntity>, OrmService>();
-		ormServices.put(Analyte.class, new OrmServiceEntityWithName<Analyte>("analytes", Analyte.class));
-		ormServices.put(Column.class, new OrmServiceEntityWithName<Column>("columns", Column.class));
-		ormServices.put(Detector.class, new OrmServiceEntityWithName<Detector>("detectors", Detector.class));
-		ormServices.put(Solvent.class, new OrmServiceEntityWithName<Solvent>("solvents", Solvent.class));
-		ormServices.put(SeriesHead.class,  new OrmServiceSeriesHead());
-		ormServices.put(SeriesSolvents.class, new OrmServiceSeriesSolvents());
-		ormServices.put(SeriesBody.class, new OrmServiceSeriesBody());
+		ormServices.put(Analyte.class, new OrmServiceEntityWithName<Analyte>("analytes", Analyte.class, db));
+		ormServices.put(Column.class, new OrmServiceEntityWithName<Column>("columns", Column.class, db));
+		ormServices.put(Detector.class, new OrmServiceEntityWithName<Detector>("detectors", Detector.class, db));
+		ormServices.put(Solvent.class, new OrmServiceEntityWithName<Solvent>("solvents", Solvent.class, db));
+		ormServices.put(SeriesHead.class,  new OrmServiceSeriesHead(db));
+		ormServices.put(SeriesSolvents.class, new OrmServiceSeriesSolvents(db));
+		ormServices.put(SeriesBody.class, new OrmServiceSeriesBody(db));
 	}
 	
 	@SuppressWarnings("rawtypes")

@@ -12,8 +12,8 @@ import android.database.sqlite.SQLiteDatabase;
 
 public class OrmServiceSeriesBody extends OrmService<SeriesBody> {
 
-	public OrmServiceSeriesBody() {
-		super("series_body", SeriesBody.class);
+	public OrmServiceSeriesBody(SQLiteDatabase db) {
+		super("series_body", SeriesBody.class, db);
 	}
 
 	@Override
@@ -30,8 +30,7 @@ public class OrmServiceSeriesBody extends OrmService<SeriesBody> {
 	}
 
 	@Override
-	protected void fillEntity(SeriesBody entity, Cursor cursor,
-			SQLiteDatabase db) {
+	protected void fillEntity(SeriesBody entity, Cursor cursor) {
 		//no need
 	}
 

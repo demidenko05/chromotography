@@ -12,7 +12,6 @@ import org.demidenko05.android.chromatography.model.Column;
 import org.demidenko05.android.chromatography.model.Detector;
 import org.demidenko05.android.chromatography.model.SeriesHead;
 import org.demidenko05.android.chromatography.sqlite.DatabaseService;
-import org.demidenko05.android.chromatography.sqlite.Datasource;
 import org.demidenko05.android.chromatography.sqlite.OrmService;
 import org.demidenko05.android.chromatography.R;
 import android.os.Bundle;
@@ -21,7 +20,6 @@ import android.app.ListActivity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.database.sqlite.SQLiteDatabase;
 import android.util.SparseBooleanArray;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,10 +29,8 @@ import android.widget.TextView;
 
 public class StoredDataActivity extends ListActivity {
 
-	private Datasource ds;
 	private DatabaseService databaseService = DatabaseService.getInstance();
 	private DataToPlot dataToPlot = DataToPlot.getInstance();
-	private SQLiteDatabase db;
 	private Column filterColumn;
 	private Detector filterDetector;
 	private List<SeriesHead> list = new ArrayList<SeriesHead>();
@@ -45,13 +41,12 @@ public class StoredDataActivity extends ListActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_stored_data);
-		ds = Datasource.getInstance();
 		txtTitleStoredData = (TextView) findViewById(R.id.txtTitleStoredData);
 		if(savedInstanceState != null) {//return from rotate
 			Long columnId = savedInstanceState.getLong(OrmService.COLUMN_ID_COLUMN);
-			if(columnId != null) filterColumn = OrmServicesFactory.getInstance().getOrmService(Column.class).getEntityById(getDbToRead(), columnId);
+			if(columnId != null) filterColumn = OrmServicesFactory.getInstance().getOrmService(Column.class).getEntityById(columnId);
 			Long detectorId = savedInstanceState.getLong(OrmService.COLUMN_ID_DETECTOR);
-			if(detectorId != null) filterDetector = OrmServicesFactory.getInstance().getOrmService(Detector.class).getEntityById(getDbToRead(), detectorId);
+			if(detectorId != null) filterDetector = OrmServicesFactory.getInstance().getOrmService(Detector.class).getEntityById(detectorId);
 		}
 		arrAdapter = new ArrayAdapter<SeriesHead>(this, android.R.layout.simple_list_item_multiple_choice, list);
 		setListAdapter(arrAdapter);
@@ -128,25 +123,6 @@ public class StoredDataActivity extends ListActivity {
 	    }
 	}
 	
-	@Override
-	protected void onPause() {
-		closeDb();
-		super.onPause();
-	}
-	
-	private void closeDb() {
-		if(db != null) {
-			db.close();
-			db = null;
-		}
-	}
-	
-	private SQLiteDatabase getDbToRead() {
-		if(db == null)
-			db = ds.getDbToRead();
-		return db;
-	}
-	
 	public String getFilterColumnText() {
 		if(filterColumn == null) return "No";
 		return filterColumn.getName();
@@ -210,9 +186,9 @@ public class StoredDataActivity extends ListActivity {
 		//put series to chart activity
 		try {
 			dataToPlot.setSeriesToShow(seriesToShow);
-			dataToPlot.setTitles(databaseService.getTitles(getDbToRead(), seriesToShow));
-			dataToPlot.setXAxisData(databaseService.getXAxisData(getDbToRead(), seriesToShow));
-			dataToPlot.setYAxisDataList(databaseService.getYAxisDataList(getDbToRead(), seriesToShow));
+			dataToPlot.setTitles(databaseService.getTitles(seriesToShow));
+			dataToPlot.setXAxisData(databaseService.getXAxisData(seriesToShow));
+			dataToPlot.setYAxisDataList(databaseService.getYAxisDataList(seriesToShow));
 	        intent.putExtra(Intent.EXTRA_TITLE, title);
 			startActivity(intent);
 		} catch (SeriesNotSameDurationException e) {
@@ -244,7 +220,7 @@ public class StoredDataActivity extends ListActivity {
 		String title = this.getString(R.string.stored_series) + titleAdd;
 		txtTitleStoredData.setText(title+":");
 		if(list.size() > 0) list.clear();
-		databaseService.fillSeriesList(getDbToRead(), list, selection);
+		databaseService.fillSeriesList(list, selection);
 		arrAdapter.notifyDataSetChanged();
 	}
 

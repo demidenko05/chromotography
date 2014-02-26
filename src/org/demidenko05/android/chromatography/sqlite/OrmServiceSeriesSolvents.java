@@ -12,8 +12,8 @@ import android.database.sqlite.SQLiteDatabase;
 
 public class OrmServiceSeriesSolvents extends OrmService<SeriesSolvents> {
 
-	public OrmServiceSeriesSolvents() {
-		super("series_solvents", SeriesSolvents.class);
+	public OrmServiceSeriesSolvents(SQLiteDatabase db) {
+		super("series_solvents", SeriesSolvents.class, db);
 	}
 
 	@Override
@@ -28,13 +28,12 @@ public class OrmServiceSeriesSolvents extends OrmService<SeriesSolvents> {
 	}
 
 	@Override
-	protected void fillEntity(SeriesSolvents entity, Cursor cursor,
-			SQLiteDatabase db) {
+	protected void fillEntity(SeriesSolvents entity, Cursor cursor) {
 		entity.setId(cursor.getLong(0));
 		SeriesHead seriesHead = new SeriesHead();
 		seriesHead.setId(cursor.getLong(1));
 		entity.setSeriesHead(seriesHead);
-		entity.setSolvent(OrmServicesFactory.getInstance().getOrmService(Solvent.class).getEntityById(db, cursor.getLong(2)));
+		entity.setSolvent(OrmServicesFactory.getInstance().getOrmService(Solvent.class).getEntityById(cursor.getLong(2)));
 		entity.setAmount(cursor.getString(3));
 	}
 

@@ -21,6 +21,8 @@ public class ChromSqliteHelper extends SQLiteOpenHelper {
 	@Override
 	public void onCreate(SQLiteDatabase db) {
 		DbCreator dbCreator = new DbCreator();//To avoid use a lot of memory then the DB is already created and populated
+		OrmServicesFactory ormServicesFactory = OrmServicesFactory.getInstance();
+		ormServicesFactory.init(db);
 		dbCreator.createAndPopulate(db);
 	}
 
@@ -29,7 +31,7 @@ public class ChromSqliteHelper extends SQLiteOpenHelper {
 		Log.w(ChromSqliteHelper.class.getName(),
 		        "Upgrading database from version " + oldVersion + " to "
 		            + newVersion + ", which will destroy all old data");
-		recreate(db);
+		//recreate(db);
 	}
 
 	@SuppressWarnings("rawtypes")

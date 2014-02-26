@@ -14,56 +14,75 @@ public abstract class OrmService <T extends AbstractEntity> {
 	
 	private final String tableName;
 	private final Class<T> entityClass;
+	protected final SQLiteDatabase db;
 		
-	public OrmService(String tableName, Class<T> entityClass) {
+	public OrmService(String tableName, Class<T> entityClass, SQLiteDatabase db) {
 		this.tableName = tableName;
 		this.entityClass = entityClass;
+		this.db = db;
 	}
 	
-	public T getEntityById(SQLiteDatabase db, long id) {
+	public T getEntityById(long id) {
 		T entity = null;
-		Cursor cursor = db.query(getTableName(),
-				getAllColumns(), COLUMN_ID + "=" + id, null, null, null, null);
+		Cursor cursor;;
+		synchronized (db) {
+			cursor = db.query(getTableName(),
+					getAllColumns(), COLUMN_ID + "=" + id, null, null, null, null);
+		}
 		if(cursor.moveToFirst()) {
-			entity = createEntity(db, cursor);
+			entity = createEntity(cursor);
 		}
 		return entity;
 	}
 
-	public long insert(SQLiteDatabase db, T entity) {
-	    return db.insert(getTableName(), null, getValuesMap(entity));
+	public long insert(T entity) {
+	    long id;
+		synchronized (db) {
+		    id = db.insert(getTableName(), null, getValuesMap(entity));
+		}
+		return id;
 	}
 
-	public void update(SQLiteDatabase db, T entity) {
-		db.update(getTableName(), getValuesMap(entity), COLUMN_ID+"="+entity.getId(), null);
+	public void update(T entity) {
+		synchronized (db) {
+			db.update(getTableName(), getValuesMap(entity), COLUMN_ID+"="+entity.getId(), null);
+		}
 	}
 
-	public void delete(SQLiteDatabase db, T entity) {
-		db.delete(getTableName(), COLUMN_ID+"="+entity.getId(), null);
+	public void delete(T entity) {
+		synchronized (db) {
+			db.delete(getTableName(), COLUMN_ID+"="+entity.getId(), null);
+		}
 	}
 
-	public List<T> getEntities(SQLiteDatabase db, String selection, String[] selectionArgs, 
+	public List<T> getEntities(String selection, String[] selectionArgs, 
 			String groupBy, String having, String orderBy) {
 		List<T> list = new ArrayList<T>();
-		Cursor cursor = db.query(getTableName(),
-				getAllColumns(), selection, selectionArgs, groupBy, having, orderBy);
+		Cursor cursor;
+		synchronized (db) {
+			cursor = db.query(getTableName(),
+					getAllColumns(), selection, selectionArgs, groupBy, having, orderBy);
+		}
 		if(cursor.moveToFirst()) {
 			while(!cursor.isAfterLast()) {
-				list.add(createEntity(db, cursor));
+				list.add(createEntity(cursor));
 				cursor.moveToNext();
 			}
 		}
 		return list;
 	}
 
-	public void fillEntityList(SQLiteDatabase db, List<T> list, 
+	public void fillEntityList(List<T> list, 
 			String selection, String[] selectionArgs, 
 			String groupBy, String having, String orderBy) {
-		Cursor cursor = db.query(getTableName(),
-				getAllColumns(), selection, selectionArgs, groupBy, having, orderBy);
+		Cursor cursor;
+		synchronized (db) {
+			cursor = db.query(getTableName(),
+					getAllColumns(), selection, selectionArgs, groupBy, having, orderBy);
+		}
 		if(cursor.moveToFirst()) {
 			while(!cursor.isAfterLast()) {
-				list.add(createEntity(db, cursor));
+				list.add(createEntity(cursor));
 				cursor.moveToNext();
 			}
 		}
@@ -77,19 +96,19 @@ public abstract class OrmService <T extends AbstractEntity> {
 		return tableName;
 	}
 	
-	protected T createEntity(SQLiteDatabase db, Cursor cursor) {
+	protected T createEntity(Cursor cursor) {
 		T entity = null;
 		try {
 			entity = entityClass.newInstance();
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		fillEntity(entity, cursor, db);
+		fillEntity(entity, cursor);
 		return entity;
 	}
 	
 	//to override
-	protected abstract void fillEntity(T entity, Cursor cursor, SQLiteDatabase db);
+	protected abstract void fillEntity(T entity, Cursor cursor);
 
 	protected abstract String[] getAllColumns();
 
